@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import type { User } from "@supabase/supabase-js";
 import { supabase } from "../../lib/supabaseClient";
 import "./Dashboard.scss";
 
-export const Dashboard: React.FC = () => {
-  const [user, setUser] = useState<any>(null);
+export const Dashboard = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getUserData = async () => {
@@ -17,7 +20,7 @@ export const Dashboard: React.FC = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    window.location.href = "/";
+    navigate("/");
   };
 
   const userMetadata = user?.user_metadata;
@@ -49,43 +52,47 @@ export const Dashboard: React.FC = () => {
         <article className="post-article">
           <span className="badge">Acesso Concedido via JWT</span>
           <h1>
-            Como funciona a Autenticação Moderna: Tokens JWT e OAuth2 com Google
+            Você está dentro! Mas o que acabou de acontecer nos bastidores?
           </h1>
 
           <p className="intro">
-            Se você está vendo esta tela, parabéns! O seu navegador acabou de
-            receber um
-            <strong> JSON Web Token (JWT)</strong> criptografado que serviu como
-            o seu crachá de acesso para esta rota protegida.
+            Se você chegou até essa tela, significa que o sistema validou a sua
+            identidade com sucesso. Como eu mencionei no meu post, a minha maior
+            curiosidade era entender como tudo isso funcionava na prática. Olha
+            só o que aconteceu entre o seu clique e o carregamento desta página:
           </p>
           <hr />
+
           <section className="topic">
-            <h2>1. O que aconteceu quando você clicou em "Entrar"?</h2>
+            <h2>1. A ponte com o Google (OAuth2)</h2>
             <p>
-              Ao escolher o login pelo <strong>Google (OAuth2)</strong>, o nosso
-              Front-end redirecionou você para os servidores seguros da Google.
-              Após sua autorização, a Google devolveu uma prova de identidade
-              para o nosso provedor de autenticação, que validou seus dados e
-              gerou um token JWT local.
-            </p>
-            <p>
-              Caso tenha criado uma conta tradicional, a sua senha passou por
-              uma validação estrita no Front-end via{" "}
-              <strong>Regex (Expressões Regulares)</strong>, garantindo que
-              senhas fracas sequer chegassem ao servidor, economizando
-              processamento e reforçando a segurança na ponta.
+              Quando você clicou em "Continuar com o Google", a aplicação não
+              tentou adivinhar sua senha. Na verdade, ela te levou até os
+              servidores seguros do Google. Depois que você autorizou, o Google
+              mandou um "ok" para o nosso banco de dados (Supabase), confirmando
+              quem você é.
             </p>
           </section>
+
           <section className="topic">
-            <h2>2. O papel do JWT nas Rotas Protegidas</h2>
+            <h2>2. O seu crachá digital (O famoso JWT)</h2>
             <p>
-              Diferente dos sistemas antigos baseados em Sessões (onde o
-              servidor precisa lembrar de cada usuário conectado gastando
-              memória), o JWT é <strong>stateless</strong> (sem estado). Ele
-              fica guardado no seu navegador e, toda vez que você tenta acessar
-              uma página interna como esta, o nosso middleware (Route Guard) lê
-              a assinatura desse token. Se ela for válida e não tiver expirado,
-              o acesso é liberado instantaneamente.
+              Com a confirmação feita, o sistema gerou um token chamado{" "}
+              <strong>JWT (JSON Web Token)</strong>. Pense nele como um crachá
+              digital criptografado que agora está guardado aí no seu navegador.
+              A grande vantagem é que o servidor não precisa ficar gastando
+              memória lembrando de você o tempo todo.
+            </p>
+          </section>
+
+          <section className="topic">
+            <h2>3. A proteção desta página</h2>
+            <p>
+              Você não consegue acessar essa Dashboard simplesmente colando o
+              link no navegador. Toda vez que alguém tenta entrar aqui, o código
+              verifica se o "crachá" (JWT) está presente e se ainda é válido. Se
+              não estiver, o sistema bloqueia e manda o usuário de volta para a
+              tela inicial!
             </p>
           </section>
         </article>
